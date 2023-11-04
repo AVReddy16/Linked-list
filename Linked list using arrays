@@ -1,0 +1,86 @@
+#include <iostream>
+
+class Node {
+public:
+    int row, col, value;
+    Node* next;
+
+    Node(int r, int c, int val) : row(r), col(c), value(val), next(nullptr) {}
+};
+
+class SparseMatrix {
+private:
+    int rows, cols;
+    Node** matrix;
+
+public:
+    SparseMatrix(int r, int c) : rows(r), cols(c) {
+        matrix = new Node*[rows];
+        for (int i = 0; i < rows; ++i) {
+            matrix[i] = nullptr;
+        }
+    }
+
+    ~SparseMatrix() {
+        for (int i = 0; i < rows; ++i) {
+            Node* current = matrix[i];
+            while (current) {
+                Node* temp = current;
+                current = current->next;
+                delete temp;
+            }
+        }
+        delete[] matrix;
+    }
+
+    void setElement(int row, int col, int value) {
+        if (row < 0 || row >= rows || col < 0 || col >= cols) {
+            std::cerr << "Invalid row or column index." << std::endl;
+            return;
+        }
+
+        Node* newNode = new Node(row, col, value);
+        newNode->next = matrix[row];
+        matrix[row] = newNode;
+    }
+
+    int getElement(int row, int col) {
+        if (row < 0 || row >= rows || col < 0 || col >= cols) {
+            std::cerr << "Invalid row or column index." << std::endl;
+            return 0;
+        }
+
+        Node* current = matrix[row];
+        while (current) {
+            if (current->col == col) {
+                return current->value;
+            }
+            current = current->next;
+        }
+        return 0; // Return 0 for elements not explicitly set.
+    }
+
+    void printMatrix() {
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                std::cout << getElement(i, j) << " ";
+            }
+            std::cout << std::endl;
+        }
+    }
+};
+
+int main() {
+    SparseMatrix sparse(5, 5);
+
+    sparse.setElement(0, 0, 1);
+    sparse.setElement(1, 1, 2);
+    sparse.setElement(2, 2, 3);
+    sparse.setElement(3, 3, 4);
+    sparse.setElement(4, 4, 5);
+
+    std::cout << "Sparse Matrix:" << std::endl;
+    sparse.printMatrix();
+
+    return 0;
+}
